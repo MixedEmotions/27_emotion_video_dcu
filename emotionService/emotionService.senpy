@@ -1,0 +1,28 @@
+{
+    "name": "machineTranslation",
+    "module": "machineTranslation",
+    "description": "Machine Translation",
+    "author": "@micarc @vlaand",
+    "version": "0.1.0",
+
+    "extra_params": {
+        "sourcelanguage": {
+            "aliases": ["sourcelanguage", "s"],
+            "required": true,
+            "options": ["en", "es"],
+            "default": "en"
+        },    
+        "targetlanguage": {
+            "aliases": ["targetlanguage", "t"],
+            "required": true,
+            "options": ["en", "es"],
+            "default": "es"
+        }
+     },
+    "requirements": [
+        "numpy>=1.8.2",
+        "scikit-learn>=0.14.1",
+        "senpy"
+        ]
+        
+}
