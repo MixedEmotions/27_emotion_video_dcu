@@ -1,4 +1,4 @@
-This plugin uses SVM Classifiers trained on HashTag corpora using word embedding and N-grams for emotion analysis.
+Video analysis module that detects emotions from a single face detected in the video.
 
 
 Known issues
