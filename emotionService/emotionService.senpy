@@ -9,13 +9,15 @@
         "filename": {
             "aliases": ["filename", "f"],
             "required": true,
-            "options": ["sample.mp4", "sample.mov"],
+            "options": ["sample.mp4", "wikoe20151114_wiruebli_sd_avc.mp4"],
             "default": "sample.mp4"
         }
      },
     "requirements": [
         "numpy>=1.8.2",
-        "senpy"
+        "senpy",
+        "ffmpeg-python",
+        "ffmpy"
         ]
         
 }

@@ -11,7 +11,7 @@ import os
 import xml.etree.ElementTree as ET
 
 from senpy.plugins import EmotionPlugin, SenpyPlugin
-from senpy.models import Results, EmotionSet, Entry, Emotion
+from senpy.models import Results, EmotionSet, Entry, Emotion, Error
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +21,8 @@ from collections import defaultdict
 
 import gzip
 from datetime import datetime 
+
+import ffmpeg
 
 
 
@@ -63,10 +65,19 @@ class emotionService(EmotionPlugin):
     def analyse(self, **params):
         
         logger.debug("emotionService with params {}".format(params))
-                
-        filename = params.get("filename", None)
         
-##------## PUT YOUR CODE HERE------------------------------- \          
+        
+##------## PUT YOUR CODE HERE------------------------------- \  
+
+        filename = params.get("filename", None)
+#         filename = '/var/www/mixedemotions/tmp/wikoe20151114_wiruebli_sd_avc.mp4'
+        filename = '/home/vlaand/data/wikoe20151114_wiruebli_sd_avc.mp4'
+    
+        if not os.path.isfile(filename):
+            raise Error("Error: File does not exist")
+    
+#         input_file = ffmpeg.file_input(filename)
+    
         
         feature_set = self._extract_features(filename = filename)
         
