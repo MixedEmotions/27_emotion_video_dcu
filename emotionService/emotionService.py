@@ -24,6 +24,7 @@ from datetime import datetime
 
 import ffmpeg
 import requests, shutil
+import subprocess
 
 
 
@@ -61,11 +62,6 @@ class emotionService(EmotionPlugin):
             
     # CUSTOM FUNCTION
     
-    def _extract_features(self, filename):
-        
-        feature_set = { dimension:float(5.0) for dimension in ['V','A','D'] }            
-        return feature_set    
-        
     def _download_file(self, saveFolder = 'tmp', url = "http://mixedemotions.insight-centre.org/tmp/little-girl.mp4"):
         
         logger.info("{} {}".format(datetime.now(), "downloading "+url))
@@ -75,8 +71,6 @@ class emotionService(EmotionPlugin):
         dump = downloadedFile.raw
 
         path, filename  = os.path.dirname(url), os.path.basename(url)    
-        #print(path, filename)
-
         with open(os.path.join(saveFolder, filename), 'wb') as file:
             shutil.copyfileobj(dump, file)
 
@@ -87,41 +81,28 @@ class emotionService(EmotionPlugin):
 
         return os.path.join(saveFolder,filename)
     
-    
-    
-    
+
+    def _extract_features(self, filename):
+        
+        feature_set = { dimension:float(5.0) for dimension in ['V','A','D'] }            
+        return feature_set      
         
     def analyse(self, **params):
         
-        logger.debug("emotionService with params {}".format(params))    
-        
+        logger.debug("emotionService with params {}".format(params))  
         
         
         
         ## FILE MANIPULATIONS ------------------------------- \  
         
-        filename = params.get("filename", None)
-        #filename = 'little-girl.mp4' # TEMPORARY FIX
-        
-        #filename = '/var/www/mixedemotions/tmp/wikoe20151114_wiruebli_sd_avc.mp4''
-#         url = "http://mixedemotions.insight-centre.org/tmp/little-girl.mp4"
-        
-        #if not os.path.isfile(filename):
-            #raise Error("File does not exist")
-            #print("File does not exist")     
-        
-#         filename = self._download_file(
-#                 saveFolder = 'tmp',
-#                 url = "http://mixedemotions.insight-centre.org/tmp/little-girl.mp4")
+        filename = params.get("i", None)
+        logger.info("{} {}".format(datetime.now(), filename))
         
         filename = os.path.join(self._storage_path, filename)
-    
+        logger.info("{} {}".format(datetime.now(), filename))
+        
         if not os.path.isfile(filename):
-            raise Error("File does not exist") 
-        else:
-            print("file found")
-            
-        #input_file = ffmpeg.file_input(filename)    
+            raise Error("File %s does not exist" % filename) 
             
             
         

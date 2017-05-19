@@ -4,15 +4,6 @@
     "description": "emotionService",
     "author": "@haolin @vlaand",
     "version": "0.1.0",
-
-    "extra_params": {
-        "filename": {
-            "aliases": ["filename", "f"],
-            "required": true,
-            "options": ["little-girl.mp4", "wikoe20151114_wiruebli_sd_avc.mp4"],
-            "default": "little-girl.mp4"
-        }
-     },
     "requirements": [
         "numpy>=1.8.2",
         "senpy",
