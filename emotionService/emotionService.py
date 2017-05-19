@@ -23,6 +23,7 @@ import gzip
 from datetime import datetime 
 
 import ffmpeg
+import requests, shutil
 
 
 
@@ -40,6 +41,9 @@ class emotionService(EmotionPlugin):
             "A": "http://www.gsi.dit.upm.es/ontologies/onyx/vocabularies/anew/ns#arousal",
             "D": "http://www.gsi.dit.upm.es/ontologies/onyx/vocabularies/anew/ns#dominance"          
             }  
+        
+        self._storage_path = '/home/vlaand/IpythonNotebooks/27_emotion_video_dcu/tmp'
+        self._storage_path = 'tmp'
         
 
     def activate(self, *args, **kwargs):
@@ -60,31 +64,74 @@ class emotionService(EmotionPlugin):
     def _extract_features(self, filename):
         
         feature_set = { dimension:float(5.0) for dimension in ['V','A','D'] }            
-        return feature_set
+        return feature_set    
+        
+    def _download_file(self, saveFolder = 'tmp', url = "http://mixedemotions.insight-centre.org/tmp/little-girl.mp4"):
+        
+        logger.info("{} {}".format(datetime.now(), "downloading "+url))
+        st = datetime.now()        
+        global dump       
+        downloadedFile = requests.get(url, stream=True)
+        dump = downloadedFile.raw
 
+        path, filename  = os.path.dirname(url), os.path.basename(url)    
+        #print(path, filename)
+
+        with open(os.path.join(saveFolder, filename), 'wb') as file:
+            shutil.copyfileobj(dump, file)
+
+        del dump
+        del downloadedFile
+        
+        logger.info("{} {}".format(datetime.now() - st, "downloaded "+url))
+
+        return os.path.join(saveFolder,filename)
+    
+    
+    
+    
+        
     def analyse(self, **params):
         
-        logger.debug("emotionService with params {}".format(params))
+        logger.debug("emotionService with params {}".format(params))    
         
         
-##------## PUT YOUR CODE HERE------------------------------- \  
-
+        
+        
+        ## FILE MANIPULATIONS ------------------------------- \  
+        
         filename = params.get("filename", None)
-#         filename = '/var/www/mixedemotions/tmp/wikoe20151114_wiruebli_sd_avc.mp4'
-        filename = '/home/vlaand/data/wikoe20151114_wiruebli_sd_avc.mp4'
+        #filename = 'little-girl.mp4' # TEMPORARY FIX
+        
+        #filename = '/var/www/mixedemotions/tmp/wikoe20151114_wiruebli_sd_avc.mp4''
+#         url = "http://mixedemotions.insight-centre.org/tmp/little-girl.mp4"
+        
+        #if not os.path.isfile(filename):
+            #raise Error("File does not exist")
+            #print("File does not exist")     
+        
+#         filename = self._download_file(
+#                 saveFolder = 'tmp',
+#                 url = "http://mixedemotions.insight-centre.org/tmp/little-girl.mp4")
+        
+        filename = os.path.join(self._storage_path, filename)
     
         if not os.path.isfile(filename):
-            raise Error("Error: File does not exist")
-    
-#         input_file = ffmpeg.file_input(filename)
-    
+            raise Error("File does not exist") 
+        else:
+            print("file found")
+            
+        #input_file = ffmpeg.file_input(filename)    
+            
+            
+        
+        ## EXTRACTING FEATURES ------------------------------- \  
         
         feature_set = self._extract_features(filename = filename)
         
-        print(feature_set)
-            
         response = Results()
-        entry = Entry()    
+        entry = Entry()   
+        entry['filename'] = filename
         
         emotionSet = EmotionSet()
         emotionSet.id = "Emotions"
@@ -93,9 +140,7 @@ class emotionService(EmotionPlugin):
         
         for dimension in ['V','A','D']:
             value = 5.0
-            emotion1[ self._centroid_mappings[dimension] ] = feature_set[dimension]
-            
-##------## PUT YOUR CODE HERE------------------------------- \
+            emotion1[ self._centroid_mappings[dimension] ] = feature_set[dimension]            
 
         emotionSet.onyx__hasEmotion.append(emotion1)
     

@@ -9,8 +9,8 @@
         "filename": {
             "aliases": ["filename", "f"],
             "required": true,
-            "options": ["sample.mp4", "wikoe20151114_wiruebli_sd_avc.mp4"],
-            "default": "sample.mp4"
+            "options": ["little-girl.mp4", "wikoe20151114_wiruebli_sd_avc.mp4"],
+            "default": "little-girl.mp4"
         }
      },
     "requirements": [
