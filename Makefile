@@ -1,5 +1,5 @@
-PYVERSION=3.5
-NAME=27_emotion_video_dcu
+PYVERSION=2.7
+NAME=27_emotion_video_alpha
 REPO=vlaand
 VERSION=latest
 PLUGINS= $(filter %/, $(wildcard */))
