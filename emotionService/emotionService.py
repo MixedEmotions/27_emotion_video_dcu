@@ -25,6 +25,10 @@ from datetime import datetime
 import ffmpeg
 import requests, shutil
 import subprocess
+import sys
+
+from haolin.ESClass import DCU_EmotionService
+
 
 
 
@@ -43,7 +47,7 @@ class emotionService(EmotionPlugin):
             "D": "http://www.gsi.dit.upm.es/ontologies/onyx/vocabularies/anew/ns#dominance"          
             }  
         
-        self._storage_path = '/home/vlaand/IpythonNotebooks/27_emotion_video_dcu/tmp'
+        #self._storage_path = '/home/vlaand/IpythonNotebooks/27_emotion_video_dcu/tmp'
         self._storage_path = 'tmp'
         
 
@@ -93,12 +97,13 @@ class emotionService(EmotionPlugin):
         
         
         
+        
         ## FILE MANIPULATIONS ------------------------------- \  
         
         filename = params.get("i", None)
         logger.info("{} {}".format(datetime.now(), filename))
         
-        filename = os.path.join(self._storage_path, filename)
+#         filename = os.path.join(self._storage_path, filename)
         logger.info("{} {}".format(datetime.now(), filename))
         
         if not os.path.isfile(filename):
@@ -106,7 +111,14 @@ class emotionService(EmotionPlugin):
             
             
         
-        ## EXTRACTING FEATURES ------------------------------- \  
+        ## EXTRACTING FEATURES ------------------------------- \ 
+        
+
+        predictor = DCU_EmotionService()
+        # use video
+        json_res = predictor.analysis_video(filename, vis=False)
+        
+        ## DEVELOPMENT ^_______________^
         
         feature_set = self._extract_features(filename = filename)
         
