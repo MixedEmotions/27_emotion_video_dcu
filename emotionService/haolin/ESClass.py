@@ -8,11 +8,7 @@ Created on Tue May 16 16:29:55 2017
 
 import numpy as np
 
-# @vlaand ======\
 import sys
-sys.path.append('/usr/local/lib/python2.7/site-packages')
-sys.path.append('/usr/src/app/python2.7/site-packages')
-# @vlaand ======/
 
 import cv2
 import json
@@ -23,8 +19,8 @@ from sklearn.externals import joblib
 from sklearn import preprocessing
 from scipy.signal import medfilt
 
-from HFEClass import HistFeatureExtractor
-from FDClass import FaceDetector
+from haolin.HFEClass import HistFeatureExtractor
+from haolin.FDClass import FaceDetector
 
 import os
 

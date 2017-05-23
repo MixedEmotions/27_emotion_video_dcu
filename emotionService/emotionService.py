@@ -22,14 +22,13 @@ from collections import defaultdict
 import gzip
 from datetime import datetime 
 
-import ffmpeg
 import requests, shutil
 import subprocess
 import sys
 
 
 from haolin.ESClass import DCU_EmotionService
-
+import json
 
 
 class emotionService(EmotionPlugin):
@@ -39,7 +38,9 @@ class emotionService(EmotionPlugin):
         self.name = info['name']
         self.id = info['module']
         self._info = info
-        local_path = os.path.dirname(os.path.abspath(__file__))        
+        local_path = os.path.dirname(os.path.abspath(__file__))
+        
+        self._dimensions = ['V','A']
         
         self._centroid_mappings = {
             "V": "http://www.gsi.dit.upm.es/ontologies/onyx/vocabularies/anew/ns#valence",
@@ -47,11 +48,14 @@ class emotionService(EmotionPlugin):
             "D": "http://www.gsi.dit.upm.es/ontologies/onyx/vocabularies/anew/ns#dominance"          
             }  
         
-        #self._storage_path = '/home/vlaand/IpythonNotebooks/27_emotion_video_dcu/tmp'
         self._storage_path = '/senpy-plugins/tmp'
         
 
     def activate(self, *args, **kwargs):
+        
+        st = datetime.now()   
+        self._predictor = DCU_EmotionService()
+        logger.info("{} {}".format(datetime.now() - st, "predictor loaded"))
         
         st = datetime.now()        
         logger.info("{} {}".format(datetime.now() - st, "active"))
@@ -66,7 +70,7 @@ class emotionService(EmotionPlugin):
             
     # CUSTOM FUNCTION
     
-    def _download_file(self, saveFolder = 'tmp', url = "http://mixedemotions.insight-centre.org/tmp/little-girl.mp4"):
+    def _download_file(self, saveFolder = '/senpy-plugins/tmp', url = "http://mixedemotions.insight-centre.org/tmp/little-girl.mp4"):
         
         logger.info("{} {}".format(datetime.now(), "downloading "+url))
         st = datetime.now()        
@@ -85,41 +89,54 @@ class emotionService(EmotionPlugin):
 
         return os.path.join(saveFolder,filename)
     
-
-    def _extract_features(self, filename):
+    def _convert_longformat_to_shortformat(self, json_long):         
         
-        feature_set = { dimension:float(5.0) for dimension in ['V','A','D'] }            
-        return feature_set      
+        json_long = json.loads(json_long)        
+        json_short = { 
+            'V': np.mean([json_long[frame]['0']['emotion']['pad:pleasure'] for frame in json_long]) , 
+            'A': np.mean([json_long[frame]['0']['emotion']['pad:arousal' ] for frame in json_long]) 
+            }
+        return json_short
+    
+    def _extract_features(self, filename, convert=True):        
+          
+        # predictor = DCU_EmotionService()
+        json_res = self._predictor.analysis_video(filename, vis=False)
+        
+        if convert:
+            json_res = self._convert_longformat_to_shortformat(json_res)
+        
+        return json_res
+    
         
     def analyse(self, **params):
         
-        logger.debug("emotionService with params {}".format(params))  
+        logger.debug("emotionService with params {}".format(params)) 
         
-               
-        
-        ## FILE MANIPULATIONS ------------------------------- \  
+                
+        ## FILE MANIPULATIONS ------------------------------- \ 
         
         filename = params.get("i", None)
-        logger.info("{} {}".format(datetime.now(), filename))
-        filename = os.path.join(self._storage_path,filename)
+        #download = params.get("d", True)
+        download = True
         
-#         filename = os.path.join(self._storage_path, filename)
+        if download:
+            #"http://mixedemotions.insight-centre.org/tmp/little-girl.mp4"
+            filename = self._download_file(saveFolder = self._storage_path, url = filename)
+        else:
+            filename = os.path.join(self._storage_path,filename)
+        
         logger.info("{} {}".format(datetime.now(), filename))
         
         if not os.path.isfile(filename):
             raise Error("File %s does not exist" % filename) 
-            
-            
         
         ## EXTRACTING FEATURES ------------------------------- \ 
-        predictor = DCU_EmotionService()
-        # use video
-        json_res = predictor.analysis_video(filename, vis=False)
-        print(json_res)
         
-        ## DEVELOPMENT ^_______________^
+        feature_set = self._extract_features(filename, convert=True)
         
-        feature_set = self._extract_features(filename = filename)
+        ## ^_______________^        
+        
         
         response = Results()
         entry = Entry()   
@@ -130,9 +147,8 @@ class emotionService(EmotionPlugin):
         
         emotion1 = Emotion() 
         
-        for dimension in ['V','A','D']:
-            value = 5.0
-            emotion1[ self._centroid_mappings[dimension] ] = feature_set[dimension]            
+        for dimension in self._dimensions:
+            emotion1[ self._centroid_mappings[dimension] ] = 5*(1+feature_set[dimension])            
 
         emotionSet.onyx__hasEmotion.append(emotion1)
     
