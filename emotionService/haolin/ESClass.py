@@ -26,8 +26,20 @@ from scipy.signal import medfilt
 from HFEClass import HistFeatureExtractor
 from FDClass import FaceDetector
 
+import os
+
 class DCU_EmotionService(object):
     def __init__(self, feature_type='LBP', face_det_type='cv'):        
+        
+        # @vlaand
+        self.local_path = os.path.dirname(os.path.abspath(__file__))
+        self._file_paths = {
+            'arousal_model': os.path.join(self.local_path,'arousal_model.pkl') ,
+            'valence_model': os.path.join(self.local_path,'valence_model.pkl'),
+            'fea_scaler': os.path.join(self.local_path,'feature_scaler.pkl')
+            }        
+        # @vlaand
+        
         self.hist_fea_ext = HistFeatureExtractor(method = feature_type)
         self.face_detector = FaceDetector(method = face_det_type)
         self.FACE_SIZE = (76,76)
@@ -35,11 +47,11 @@ class DCU_EmotionService(object):
         self.kj=4        
         self.num_fea = 59                
         # load arousal model
-        self.arousal_model = joblib.load('arousal_model.pkl')
+        self.arousal_model = joblib.load(self._file_paths['arousal_model'])
         # load valence model
-        self.valence_model = joblib.load('valence_model.pkl')
+        self.valence_model = joblib.load(self._file_paths['valence_model'])
         # load feature scaler
-        self.fea_scaler = joblib.load('feature_scaler.pkl')
+        self.fea_scaler = joblib.load(self._file_paths['fea_scaler'])
     
     def defDictOfDict(self):
         return defaultdict(dict)

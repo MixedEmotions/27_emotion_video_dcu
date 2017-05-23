@@ -27,8 +27,8 @@ import requests, shutil
 import subprocess
 import sys
 
-from haolin.ESClass import DCU_EmotionService
 
+from haolin.ESClass import DCU_EmotionService
 
 
 
@@ -48,7 +48,7 @@ class emotionService(EmotionPlugin):
             }  
         
         #self._storage_path = '/home/vlaand/IpythonNotebooks/27_emotion_video_dcu/tmp'
-        self._storage_path = 'tmp'
+        self._storage_path = '/senpy-plugins/tmp'
         
 
     def activate(self, *args, **kwargs):
@@ -95,13 +95,13 @@ class emotionService(EmotionPlugin):
         
         logger.debug("emotionService with params {}".format(params))  
         
-        
-        
+               
         
         ## FILE MANIPULATIONS ------------------------------- \  
         
         filename = params.get("i", None)
         logger.info("{} {}".format(datetime.now(), filename))
+        filename = os.path.join(self._storage_path,filename)
         
 #         filename = os.path.join(self._storage_path, filename)
         logger.info("{} {}".format(datetime.now(), filename))
@@ -112,11 +112,10 @@ class emotionService(EmotionPlugin):
             
         
         ## EXTRACTING FEATURES ------------------------------- \ 
-        
-
         predictor = DCU_EmotionService()
         # use video
         json_res = predictor.analysis_video(filename, vis=False)
+        print(json_res)
         
         ## DEVELOPMENT ^_______________^
         

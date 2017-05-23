@@ -6,16 +6,25 @@ Created on Sun May 14 19:17:10 2017
 @author: haolin
 """
 import cv2
+import os
 from imutils import face_utils
 
 class FaceDetector(object):    
-    def __init__(self, method='cv'):        
+    def __init__(self, method='cv'): 
+        
+        # @vlaand
+        self.local_path = os.path.dirname(os.path.abspath(__file__))
+        self._file_paths = {
+            'CascadeClassifier':os.path.join(self.local_path,'haarcascade_frontalface_default.xml')
+            }
+        # @vlaand
+        
         self.method = method
         if self.method == 'dlib'        :
             import dlib      
             self.detector = dlib.get_frontal_face_detector()
         elif self.method == 'cv':
-            self.face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')            
+            self.face_cascade = cv2.CascadeClassifier(self._file_paths['CascadeClassifier'])            
             
     def detect_face(self, image):
         face_rect = [0,0,0,0]
