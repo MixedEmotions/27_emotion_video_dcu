@@ -23,6 +23,7 @@ from datetime import datetime
 import requests, shutil
 import subprocess
 import sys
+import validators
 
 
 from haolin.ESClass import DCU_EmotionService
@@ -68,7 +69,7 @@ class emotionService(EmotionPlugin):
             
     # CUSTOM FUNCTION
     
-    def _download_file(self, saveFolder = '/senpy-plugins/tmp', url = "http://mixedemotions.insight-centre.org/tmp/little-girl.mp4"):
+    def _download_file_old(self, saveFolder = '/senpy-plugins/tmp', url = "http://mixedemotions.insight-centre.org/tmp/little-girl.mp4"):
         
         logger.info("{} {}".format(datetime.now(), "downloading "+url))
         st = datetime.now()        
@@ -87,7 +88,7 @@ class emotionService(EmotionPlugin):
 
         return os.path.join(saveFolder,filename)
     
-    def _download_file_v1(self, saveFolder = '/senpy-plugins/tmp', url = "http://mixedemotions.insight-centre.org/tmp/little-girl.mp4"):
+    def _download_file(self, saveFolder = '/senpy-plugins/tmp', url = "http://mixedemotions.insight-centre.org/tmp/little-girl.mp4"):
         
         st = datetime.now()
         logger.info("{} {}".format(datetime.now(), "downloading "+url))        
@@ -130,33 +131,34 @@ class emotionService(EmotionPlugin):
         
     def analyse(self, **params):
         
-        logger.debug("emotionService with params {}".format(params))         
+        logger.debug("emotionService with params {}".format(params))      
                 
+        filename = params.get("i", None)        
+             
         ## FILE MANIPULATIONS ------------------------------- \ 
         
-        filename = params.get("i", None)
-        downloaded = params.get("d", None)
-        
-        if downloaded:            
+        if validators.url(filename): 
+            filename = self._download_file(saveFolder = self._storage_path, url = filename)
+        else:            
             filename = os.path.join(self._storage_path,filename)
-        else:
-            filename = self._download_file_v1(saveFolder = self._storage_path, url = filename)
         
         logger.info("{} {}".format(datetime.now(), filename))
         
         if not os.path.isfile(filename):
             raise Error("File %s does not exist" % filename) 
+            
         
         ## EXTRACTING FEATURES ------------------------------- \ 
         
         feature_set = self._extract_features(filename, convert=True)
         # self._remove_file(filename)
         
+        
         ## GENERATING OUTPUT --------------------------------- \        
                 
         response = Results()
         entry = Entry()   
-        entry['filename'] = filename
+        entry['filename'] = os.path.basename(filename)
         
         emotionSet = EmotionSet()
         emotionSet.id = "Emotions"
