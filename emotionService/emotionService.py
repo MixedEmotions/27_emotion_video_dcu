@@ -3,8 +3,6 @@
 
 # In[ ]:
 
-
-
 from __future__ import division
 import logging
 import os
@@ -89,6 +87,27 @@ class emotionService(EmotionPlugin):
 
         return os.path.join(saveFolder,filename)
     
+    def _download_file_v1(self, saveFolder = '/senpy-plugins/tmp', url = "http://mixedemotions.insight-centre.org/tmp/little-girl.mp4"):
+        
+        st = datetime.now()
+        logger.info("{} {}".format(datetime.now(), "downloading "+url))        
+        
+        path, filename  = os.path.dirname(url), os.path.basename(url)        
+        outfilename = os.path.join(saveFolder,filename)
+        
+        subprocess.call(['wget', '-O', outfilename, url])
+        logger.info("{} {}".format(datetime.now() - st, "downloaded "+url))
+        
+        return outfilename
+    
+    def _remove_file(self, filename):
+        st = datetime.now()
+        logger.info("{} {}".format(datetime.now(), "deleting "+ filename))  
+        
+        subprocess.call(['rm', '-f', filename])
+        logger.info("{} {}".format(datetime.now() - st, "deleted "+filename))
+    
+    
     def _convert_longformat_to_shortformat(self, json_long):         
         
         json_long = json.loads(json_long)        
@@ -111,20 +130,17 @@ class emotionService(EmotionPlugin):
         
     def analyse(self, **params):
         
-        logger.debug("emotionService with params {}".format(params)) 
-        
+        logger.debug("emotionService with params {}".format(params))         
                 
         ## FILE MANIPULATIONS ------------------------------- \ 
         
         filename = params.get("i", None)
-        #download = params.get("d", True)
-        download = True
+        downloaded = params.get("d", None)
         
-        if download:
-            #"http://mixedemotions.insight-centre.org/tmp/little-girl.mp4"
-            filename = self._download_file(saveFolder = self._storage_path, url = filename)
-        else:
+        if downloaded:            
             filename = os.path.join(self._storage_path,filename)
+        else:
+            filename = self._download_file_v1(saveFolder = self._storage_path, url = filename)
         
         logger.info("{} {}".format(datetime.now(), filename))
         
@@ -134,10 +150,10 @@ class emotionService(EmotionPlugin):
         ## EXTRACTING FEATURES ------------------------------- \ 
         
         feature_set = self._extract_features(filename, convert=True)
+        # self._remove_file(filename)
         
-        ## ^_______________^        
-        
-        
+        ## GENERATING OUTPUT --------------------------------- \        
+                
         response = Results()
         entry = Entry()   
         entry['filename'] = filename
@@ -148,12 +164,11 @@ class emotionService(EmotionPlugin):
         emotion1 = Emotion() 
         
         for dimension in self._dimensions:
-            emotion1[ self._centroid_mappings[dimension] ] = 5*(1+feature_set[dimension])            
+            emotion1[ self._centroid_mappings[dimension] ] = 5*(1+feature_set[dimension])           
 
         emotionSet.onyx__hasEmotion.append(emotion1)
     
-        entry.emotions = [emotionSet,]
-        
+        entry.emotions = [emotionSet,]        
         response.entries.append(entry)
         
         return response

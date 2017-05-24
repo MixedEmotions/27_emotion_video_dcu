@@ -4,6 +4,14 @@
     "description": "emotionService",
     "author": "@haolin @vlaand",
     "version": "0.1.0",
+    "extra_params": {
+        "downloaded": {
+            "aliases": ["downloaded", "d"],
+            "required": false,
+            "options": ["True", "False"],
+            "default": "False"
+        }
+     },
     "requirements": [
         "numpy>=1.8.2",
         "scipy",

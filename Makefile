@@ -7,8 +7,8 @@ PLUGINS= $(filter %/, $(wildcard */))
 
 all: build run
 
-build: clean Dockerfile-full
-	docker build -t '$(REPO)/$(NAME):$(VERSION)' -f Dockerfile-full .;
+build: clean Dockerfile
+	docker build -t '$(REPO)/$(NAME):$(VERSION)' -f Dockerfile .;
 
 test-%:
 	docker run -v $$PWD/$*:/senpy-plugins/ --rm --entrypoint=/usr/local/bin/py.test -ti '$(REPO)/$(NAME):$(VERSION)' test.py
