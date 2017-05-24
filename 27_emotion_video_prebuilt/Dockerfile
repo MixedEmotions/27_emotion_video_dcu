@@ -1,12 +1,13 @@
 FROM gsiupm/senpy:0.8.8-python2.7
 
-COPY logo-dcu.png /usr/local/lib/python2.7/site-packages/senpy/static/img/gsi.png
-RUN perl -i -pe s^http://www.gsi.dit.upm.es^https://nuig.insight-centre.org/unlp/^g /usr/local/lib/python2.7/site-packages/senpy/templates/index.html
-RUN perl -i -pe 's^https://nuig.insight-centre.org/unlp/" target="_blank"><img id="mixedemotions-logo^http://mixedemotions-project.eu/" target="_blank"><img id="mixedemotions-logo^g' /usr/local/lib/python2.7/site-packages/senpy/templates/index.html
-
-RUN cd /
 ENV PYTHON_VERSION 2.7
 ENV NUM_CORES 4
+
+COPY logo-dcu.png /usr/local/lib/python$PYTHON_VERSION/site-packages/senpy/static/img/gsi.png
+RUN perl -i -pe s^http://www.gsi.dit.upm.es^https://nuig.insight-centre.org/unlp/^g /usr/local/lib/python$PYTHON_VERSION/site-packages/senpy/templates/index.html
+RUN perl -i -pe 's^https://nuig.insight-centre.org/unlp/" target="_blank"><img id="mixedemotions-logo^http://mixedemotions-project.eu/" target="_blank"><img id="mixedemotions-logo^g' /usr/local/lib/python$PYTHON_VERSION/site-packages/senpy/templates/index.html
+
+RUN cd /
 
 RUN apt-get -y update
 RUN apt-get -y install python$PYTHON_VERSION-dev wget unzip \

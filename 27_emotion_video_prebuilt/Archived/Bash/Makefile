@@ -1,6 +1,6 @@
 PYVERSION=2.7
-NAME=27_emotion_video_dcu
-REPO=mixedemotions
+NAME=27_emotion_video_omega
+REPO=vlaand
 VERSION=latest
 PLUGINS= $(filter %/, $(wildcard */))
 
